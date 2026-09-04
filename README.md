@@ -1,23 +1,57 @@
+<div align="center">
+
 # QuotaDeck
 
-Credential-scoped model, context, cache, and quota data for Herdr. The stable
-plugin id remains `herdr-agent-quota-win` so existing installs upgrade cleanly.
+### Know what you have left.
 
-**Windows fork authored and maintained by [Art Moreno](https://github.com/ArtMoreno).**
+Live quota, model, context and cache data.<br>
+One resizable pane, beside your work in Herdr.
 
-> **A fork of [levi-qiao/herdr-agent-quota](https://github.com/levi-qiao/herdr-agent-quota)**
-> (MIT, © 2026 Levi Qiao). It adds native Windows support, Hermes and OpenRouter
-> credit collectors, and brand marks while preserving upstream's macOS and Linux
-> paths. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
->
-> The plugin id is `herdr-agent-quota-win` so it never collides with upstream's.
+**[Website](https://artmoreno.github.io/herdr-agent-quota-win/) · [Install](#install) · [Settings](#settings) · [中文](README.zh-CN.md)**
 
 [![CI](https://github.com/ArtMoreno/herdr-agent-quota-win/actions/workflows/ci.yml/badge.svg)](https://github.com/ArtMoreno/herdr-agent-quota-win/actions/workflows/ci.yml)
-[![Rust](https://img.shields.io/badge/built%20with-Rust-dea584?logo=rust&logoColor=white)](https://www.rust-lang.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-c8ff72?labelColor=21172b)](LICENSE)
+[![Herdr](https://img.shields.io/badge/Herdr-0.8.2%2B-c8ff72?labelColor=21172b)](https://herdr.dev)
 
-Empty values collapse. Failed refreshes keep the last good value for the same
-account; confirmed PAYG sessions clear stale subscription quota.
+<img src="docs/icons/claude.png" alt="claude" width="24" height="24"> &nbsp; <img src="docs/icons/codex.png" alt="codex" width="24" height="24"> &nbsp; <img src="docs/icons/grok.png" alt="grok" width="24" height="24"> &nbsp; <img src="docs/icons/agy.png" alt="agy" width="24" height="24"> &nbsp; <img src="docs/icons/opencode.png" alt="opencode" width="24" height="24"> &nbsp; <img src="docs/icons/hermes.png" alt="hermes" width="24" height="24"> &nbsp; <img src="docs/icons/openrouter.png" alt="openrouter" width="24" height="24"> &nbsp; <img src="docs/icons/omp.png" alt="omp" width="24" height="24">
+
+</div>
+
+<p align="center"><a href="https://artmoreno.github.io/herdr-agent-quota-win/"><img src="docs/site/assets/herdr-real-three-panes.png" alt="Claude Code and OpenCode working alongside QuotaDeck in a real three-pane Herdr session" width="100%"></a></p>
+
+<p align="center"><sub>Real Claude Code and OpenCode sessions in a fictional ClipBench project. QuotaDeck values are illustrative.</sub></p>
+
+| Beside your work | Make it yours | Honest by default |
+| --- | --- | --- |
+| A real, resizable Herdr pane. | Provider order, colors, fields and sidebar layout. | Missing credentials and unknown resets stay explicit. |
+| Open with **prefix+shift+d**. | Open Settings with **prefix+shift+q** or **s**. | Uses the accounts available to your local tools. |
+
+<details>
+<summary><b>See two- and four-pane workspaces</b></summary>
+
+**Two panes — Claude Code + QuotaDeck**
+
+![Two-pane Herdr workspace](docs/site/assets/herdr-real-two-panes.png)
+
+**Four panes — Claude Code + OpenCode + Hermes + QuotaDeck**
+
+![Four-pane Herdr workspace](docs/site/assets/herdr-real-four-panes.png)
+
+Real harness sessions on fictional example code; illustrative quota data.
+
+</details>
+
+## At a glance
+
+![QuotaDeck dashboard detail](docs/site/assets/01-dashboard-all-providers.png)
+
+<sub>Illustrative capture. OpenRouter appears only in the dashboard; dollar-based rows remain dollar-based.</sub>
+
+| Settings within reach | Packed or stacked sidebar | Explicit unavailable states |
+| :---: | :---: | :---: |
+| <img src="docs/site/assets/settings-detail.png" alt="Settings control detail" width="270"> | <img src="docs/site/assets/stacked.png" alt="Stacked sidebar detail" width="210"> | <img src="docs/site/assets/unavailable-detail.png" alt="Unavailable quota states" width="270"> |
+
+---
 
 ## Install
 
@@ -341,3 +375,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and
 ## License
 
 MIT. Not affiliated with Herdr, OpenAI, Anthropic, xAI, Google, or OpenCode.
+
+
+---
+
+## Credits
+
+**Created and maintained by [Art Moreno](https://github.com/ArtMoreno).**
+
+QuotaDeck builds on [levi-qiao/herdr-agent-quota](https://github.com/levi-qiao/herdr-agent-quota),
+MIT © 2026 Levi Qiao. The plugin ID remains `herdr-agent-quota-win` for compatible upgrades.
+See [LICENSE](LICENSE) and [third-party notices](THIRD-PARTY-NOTICES.md).
