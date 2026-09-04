@@ -12,3 +12,4 @@ a:hover{text-decoration:underline}a:focus-visible,button:focus-visible,summary:f
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 .session-picker,.proof>*,.install-grid>*{min-width:0}.fine code,details code{overflow-wrap:anywhere}
 .mobile-hint{display:none}@media(max-width:700px){.mobile-hint{display:block;color:#b9adc4;font-size:12px;line-height:1.6;margin:0 0 14px}}
+.herdr-brand{display:inline-flex;align-items:center;gap:10px;margin-left:0;font-size:11px;letter-spacing:2px;color:#a79bad}.herdr-brand img{display:block;width:32px;height:32px;object-fit:contain}@media(max-width:700px){header .herdr-brand{display:inline-flex}header .herdr-brand span{display:none}}

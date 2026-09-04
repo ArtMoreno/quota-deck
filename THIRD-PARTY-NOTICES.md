@@ -71,3 +71,11 @@ font, which ships with the separate
 [qintmb/herdr-icon-agent-ui](https://github.com/qintmb/herdr-icon-agent-ui)
 plugin. No font data is bundled here — only the codepoint numbers, so that the
 two agree. The `unicode` glyph set exists for users without that font.
+
+## Herdr website logo
+
+The unchanged Herdr logo at docs/site/assets/herdr.png comes from
+https://herdr.dev/assets/logo.png and identifies the host application.
+Herdr's name and logo remain the property of their respective owners; use here
+does not imply sponsorship or endorsement.
+
