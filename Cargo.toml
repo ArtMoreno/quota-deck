@@ -1,0 +1,69 @@
+[package]
+name = "herdr-agent-quota"
+version = "1.4.0"
+edition = "2021"
+rust-version = "1.95"
+description = "QuotaDeck: credential-scoped AI quota and context in Herdr for Windows, macOS, and Linux"
+authors = ["Art Moreno"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/ArtMoreno/herdr-agent-quota-win"
+homepage = "https://github.com/ArtMoreno/herdr-agent-quota-win"
+keywords = ["herdr", "claude-code", "codex", "quota", "usage"]
+categories = ["command-line-utilities", "development-tools"]
+include = [
+    "/Cargo.toml",
+    "/Cargo.lock",
+    "/LICENSE",
+    "/README.md",
+    "/README.zh-CN.md",
+    "/CHANGELOG.md",
+    "/CONTRIBUTING.md",
+    "/SECURITY.md",
+    "/THIRD-PARTY-NOTICES.md",
+    "/herdr-plugin.toml",
+    "/install.ps1",
+    "/install.sh",
+    "/uninstall.ps1",
+    "/uninstall.sh",
+    "/rust-toolchain.toml",
+    "/scripts/**",
+    "/src/**",
+    "/tests/**",
+    "/docs/icons/**",
+]
+
+[dependencies]
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+crossterm = "0.28"
+directories = "5.0"
+serde = { version = "1.0", features = ["derive"] }
+# omp records the account serving a session as a sha256 of its identity; the
+# same digest is recomputed here to match a pane to one account's quota.
+sha2 = "0.10"
+# `preserve_order` keeps a user's own key order when `configure` rewrites
+# ~/.claude/settings.json; without it every apply silently re-sorts their file.
+serde_json = { version = "1.0", features = ["preserve_order"] }
+thiserror = "2.0"
+time = { version = "0.3", features = ["parsing"] }
+toml_edit = "0.22"
+ureq = { version = "2.12", features = ["json"] }
+# Bundled SQLite so macOS/Linux CI does not need libsqlite3 or a sqlite3 binary.
+# Used only for exact session-id lookups in OpenCode's local opencode.db.
+rusqlite = { version = "0.32.1", features = ["bundled"] }
+
+[target.'cfg(unix)'.dependencies]
+# Only used to put the Codex app-server in its own process group.
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+# Native named-pipe readiness and the Windows test server.
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_Storage_FileSystem", "Win32_System_IO", "Win32_System_Pipes"] }
+
+[dev-dependencies]
+tempfile = "3.14"
+
+[[bin]]
+name = "herdr-agent-quota"
+path = "src/main.rs"

@@ -1,0 +1,126 @@
+id = "herdr-agent-quota-win"
+name = "QuotaDeck"
+version = "1.4.0"
+min_herdr_version = "0.8.2"
+description = "Credential-scoped AI quota and context for Claude, Codex, Grok, Agy, OpenCode, Pi, omp, OpenRouter, and Hermes."
+platforms = ["macos", "linux", "windows"]
+
+# Commands are argv vectors. Hooks and actions run the binary directly. Herdr
+# 0.8.2's Windows ConPTY pane launcher cannot resolve a relative executable in
+# an old long-path-prefixed server, so Windows pane entries use `cmd.exe /C`
+# solely to resolve the repo-relative `.exe`; Unix panes remain direct.
+#
+# Runtime commands use Cargo's extensionless output path on every platform.
+# Cargo already creates that file on macOS and Linux. Herdr 0.8.2 passes the
+# path literally to CreateProcessW on Windows, so the Windows-only build step
+# copies the `.exe` to that same extensionless path.
+
+[[build]]
+command = ["cargo", "build", "--release", "--locked"]
+
+[[build]]
+platforms = ["windows"]
+command = ["powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Copy-Item -LiteralPath 'target/release/herdr-agent-quota.exe' -Destination 'target/release/herdr-agent-quota' -Force -ErrorAction Stop"]
+
+[[startup]]
+command = ["target/release/herdr-agent-quota", "startup", "--provider", "all"]
+
+[[actions]]
+id = "refresh"
+title = "Refresh QuotaDeck"
+command = ["target/release/herdr-agent-quota", "refresh", "--provider", "all", "--force"]
+
+[[actions]]
+id = "configure"
+title = "Install / repair QuotaDeck"
+command = ["target/release/herdr-agent-quota", "configure", "--apply", "--reload-herdr"]
+
+[[actions]]
+id = "open-settings"
+title = "Open QuotaDeck settings"
+command = ["target/release/herdr-agent-quota", "open-settings"]
+
+[[actions]]
+id = "open-dashboard"
+title = "Open QuotaDeck dashboard"
+command = ["target/release/herdr-agent-quota", "open-dashboard"]
+
+[[actions]]
+id = "open-dashboard-split"
+title = "Open QuotaDeck in split pane"
+command = ["target/release/herdr-agent-quota", "open-dashboard-split"]
+
+[[actions]]
+id = "uninstall"
+title = "Uninstall QuotaDeck configuration"
+command = ["target/release/herdr-agent-quota", "configure", "--uninstall", "--reload-herdr"]
+
+[[events]]
+id = "agent-quota-refresh"
+on = "pane.agent_detected"
+command = ["target/release/herdr-agent-quota", "event"]
+
+[[events]]
+id = "agent-quota-status-refresh"
+on = "pane.agent_status_changed"
+command = ["target/release/herdr-agent-quota", "event"]
+
+[[events]]
+id = "focused-agent-quota-refresh"
+on = "pane.focused"
+command = ["target/release/herdr-agent-quota", "focus"]
+
+[[panes]]
+id = "dashboard"
+platforms = ["macos", "linux"]
+title = "QuotaDeck"
+command = ["target/release/herdr-agent-quota", "dashboard"]
+placement = "popup"
+# Nine possible rows (including local OpenCode and conditional OpenCode Go)
+# plus the title and footer fit without wrapping. Herdr adds two border rows.
+width = 78
+height = 20
+
+[[panes]]
+id = "settings"
+platforms = ["macos", "linux"]
+title = "QuotaDeck settings"
+command = ["target/release/herdr-agent-quota", "settings"]
+placement = "popup"
+# Every option on screen at once. The default half-size popup is 24 rows and
+# the designed card is 78 columns by 30 interior rows. Herdr adds the border.
+# The renderer clips safely when the terminal forces a smaller popup.
+width = 78
+height = 32
+
+[[panes]]
+id = "dashboard-split"
+platforms = ["macos", "linux"]
+title = "QuotaDeck split"
+command = ["target/release/herdr-agent-quota", "dashboard"]
+placement = "split"
+
+[[panes]]
+id = "dashboard-windows"
+platforms = ["windows"]
+title = "QuotaDeck"
+command = ["cmd.exe", "/D", "/C", "target\\release\\herdr-agent-quota.exe", "dashboard"]
+placement = "popup"
+width = 78
+height = 20
+
+[[panes]]
+id = "settings-windows"
+platforms = ["windows"]
+title = "QuotaDeck settings"
+command = ["cmd.exe", "/D", "/C", "target\\release\\herdr-agent-quota.exe", "settings"]
+placement = "popup"
+width = 78
+height = 32
+
+[[panes]]
+id = "dashboard-split-windows"
+platforms = ["windows"]
+title = "QuotaDeck split"
+command = ["cmd.exe", "/D", "/C", "target\\release\\herdr-agent-quota.exe", "dashboard"]
+placement = "split"

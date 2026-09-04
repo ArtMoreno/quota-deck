@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Hermes original winged H marker">
+  <!-- Original QuotaDeck mark: a geometric H with messenger wings. -->
+  <rect width="64" height="64" rx="14" fill="#111827"/>
+  <g fill="none" stroke="#e8edf7" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 19v27M40 19v27M24 32h16"/>
+    <path d="M21 23c-4-4-9-6-14-5 4 2 7 5 9 9-3-1-6-1-9 0 5 2 8 5 11 9"/>
+    <path d="M43 23c4-4 9-6 14-5-4 2-7 5-9 9 3-1 6-1 9 0-5 2-8 5-11 9"/>
+  </g>
+  <circle cx="32" cy="13" r="3" fill="#e8edf7"/>
+</svg>

@@ -1,0 +1,11 @@
+*.sh text eol=lf
+
+/AGENTS.md export-ignore
+/CLAUDE.md export-ignore
+/design-qa.md export-ignore
+/docs/plans export-ignore
+/docs/research export-ignore
+/docs/review export-ignore
+/docs/screenshots export-ignore
+/GUI-CODEX-MOCKUP-HANDOFF.md export-ignore
+/docs/mockups export-ignore

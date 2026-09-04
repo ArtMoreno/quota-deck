@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="OpenCode marker">
+  <!-- OpenCode mark. Source: https://github.com/simple-icons/simple-icons (CC0) -->
+  <rect width="64" height="64" rx="14" fill="#111827"/>
+  <g transform="translate(8 8) scale(2)">
+    <path fill="#e8edf7" d="M22 24H2V0h20zM17 4.8H7v14.4h10z"/>
+  </g>
+</svg>

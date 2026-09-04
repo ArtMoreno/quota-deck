@@ -1,0 +1,46 @@
+name: Bug report
+description: A quota value is wrong, missing, or a sidebar/dashboard row does not appear.
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Which provider?
+      options: [Claude Code, Codex, Grok, Agy / Antigravity, OpenCode, Pi, omp, Hermes, OpenRouter, All of them, Not provider specific]
+    validations:
+      required: true
+  - type: input
+    id: cli-version
+    attributes:
+      label: CLI version
+      description: "Output of e.g. `claude --version`, `codex --version`, `grok --version`."
+      placeholder: "codex 0.147.0"
+    validations:
+      required: true
+  - type: input
+    id: herdr-version
+    attributes:
+      label: Herdr version
+      placeholder: "0.8.2"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What the sidebar showed, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: refresh-output
+    attributes:
+      label: Refresh output
+      description: "Output of `herdr-agent-quota refresh --provider all --force --json`. Redact anything you consider sensitive."
+      render: json
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS, Linux]
+    validations:
+      required: true

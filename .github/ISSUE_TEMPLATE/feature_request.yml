@@ -1,0 +1,26 @@
+name: Feature request
+description: Support another CLI, window, or sidebar layout.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to see in the sidebar or dashboard?
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where does that number come from locally?
+      description: >
+        A new provider needs a local, documented source: a statusLine/hook JSON
+        payload, a local CLI command, or a contract the official CLI itself
+        uses. This project does not scrape browser cookies or private web APIs.
+    validations:
+      required: true
+  - type: textarea
+    id: payload
+    attributes:
+      label: Sample payload
+      description: A redacted sample of that JSON, if you have one.
+      render: json

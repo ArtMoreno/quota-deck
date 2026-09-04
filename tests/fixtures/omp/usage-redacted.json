@@ -1,0 +1,78 @@
+{
+  "capacity": {
+    "xai-oauth": [
+      { "window": "7d", "durationMs": 604800000 }
+    ],
+    "openai-codex": [
+      { "window": "5h", "durationMs": 18000000 },
+      { "window": "7d", "durationMs": 604800000 }
+    ],
+    "google-antigravity": [
+      { "window": "1d", "durationMs": 86400000 }
+    ],
+    "cursor": [
+      { "window": "Monthly", "durationMs": 2592000000 }
+    ]
+  },
+  "reports": [
+    {
+      "provider": "xai-oauth",
+      "fetchedAt": 1788220000000,
+      "metadata": { "accountId": "synthetic-xai-account" },
+      "limits": [
+        {
+          "id": "weekly",
+          "window": { "durationMs": 604800000, "resetsAt": 1788701555000 },
+          "amount": { "usedFraction": 0.59 }
+        },
+        {
+          "id": "grokbuild:weekly",
+          "window": { "durationMs": 604800000, "resetsAt": 1788701555000 },
+          "amount": { "usedFraction": 0.73 }
+        }
+      ]
+    },
+    {
+      "provider": "openai-codex",
+      "fetchedAt": 1788220000000,
+      "metadata": { "accountId": "synthetic-codex-account" },
+      "limits": [
+        {
+          "id": "rolling",
+          "window": { "durationMs": 18000000, "resetsAt": 1788238000000 },
+          "amount": { "usedFraction": 0.0 }
+        },
+        {
+          "id": "weekly",
+          "window": { "durationMs": 604800000, "resetsAt": 1788824800000 },
+          "amount": { "usedFraction": 0.14 }
+        }
+      ]
+    },
+    {
+      "provider": "google-antigravity",
+      "fetchedAt": 1788220000000,
+      "metadata": { "accountId": "synthetic-antigravity-account" },
+      "limits": [
+        {
+          "id": "daily",
+          "window": { "durationMs": 86400000, "resetsAt": 1788306400000 },
+          "amount": { "usedFraction": 0.0 }
+        }
+      ]
+    },
+    {
+      "provider": "cursor",
+      "fetchedAt": 1788220000000,
+      "metadata": { "accountId": "synthetic-cursor-account" },
+      "limits": [
+        {
+          "id": "monthly",
+          "window": { "durationMs": 2592000000 },
+          "amount": { "usedFraction": 1.0 }
+        }
+      ]
+    }
+  ],
+  "accountsWithoutUsage": []
+}

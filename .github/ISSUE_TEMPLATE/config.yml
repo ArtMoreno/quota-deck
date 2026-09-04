@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Herdr plugin documentation
+    url: https://herdr.dev/docs/plugins/
+    about: How Herdr discovers, links, and runs sidebar plugins.

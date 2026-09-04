@@ -1,0 +1,20 @@
+{
+  "quota": {
+    "gemini-5h": {
+      "remaining_fraction": 0.9969,
+      "reset_time": "2026-08-15T12:00:00Z"
+    },
+    "gemini-weekly": {
+      "remaining_fraction": 0.9969,
+      "reset_time": "2026-08-22T12:00:00Z"
+    },
+    "3p-5h": {
+      "remaining_fraction": 1.0,
+      "reset_time": "2026-08-15T12:00:00Z"
+    },
+    "3p-weekly": {
+      "remaining_fraction": 1.0,
+      "reset_time": "2026-08-22T12:00:00Z"
+    }
+  }
+}

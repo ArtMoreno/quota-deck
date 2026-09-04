@@ -1,0 +1,12 @@
+{
+  "rate_limits": {
+    "five_hour": {
+      "used_percentage": 58.0,
+      "resets_at": "2026-08-15T12:00:00Z"
+    },
+    "seven_day": {
+      "used_percentage": 27.0,
+      "resets_at": "2026-08-22T12:00:00Z"
+    }
+  }
+}

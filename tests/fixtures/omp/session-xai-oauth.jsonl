@@ -1,0 +1,8 @@
+{"type":"title","v":1,"updatedAt":"2099-01-01T00:00:00Z","pad":"synthetic fixture"}
+{"type":"session","version":3,"id":"00000000-0000-4000-8000-000000000001","timestamp":"2099-01-01T00:00:00Z","cwd":"/synthetic/workspace"}
+{"type":"model_change","id":"event-1","parentId":null,"timestamp":"2099-01-01T00:00:01Z","model":"openai-codex/gpt-synthetic","role":"default","resolvedModelIsFallback":false}
+{"type":"message","id":"event-2","parentId":"event-1","timestamp":"2099-01-01T00:00:02Z","message":{"role":"assistant","provider":"openai-codex","model":"gpt-synthetic","timestamp":4070908802000,"usage":{"totalTokens":100},"content":[]}}
+{"type":"credential_pin","id":"event-3","parentId":"event-2","timestamp":"2099-01-01T00:00:03Z","provider":"openai-codex","hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+{"type":"model_change","id":"event-4","parentId":"event-3","timestamp":"2099-01-01T00:00:04Z","model":"xai-oauth/grok-4.6","role":"default","resolvedModelIsFallback":false}
+{"type":"message","id":"event-5","parentId":"event-4","timestamp":"2099-01-01T00:00:05Z","message":{"role":"assistant","provider":"xai-oauth","model":"grok-4.6","timestamp":4070908805000,"usage":{"totalTokens":500},"content":[]}}
+{"type":"credential_pin","id":"event-6","parentId":"event-5","timestamp":"2099-01-01T00:00:06Z","provider":"xai-oauth","hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}

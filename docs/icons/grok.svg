@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Grok marker">
+  <!-- Grok's slashed circle, in white. Both arcs are r=13 about (32,32) — one
+       centre, so the ring does not step at the junctions — and the gaps run
+       from 55° to 35° either side of the slash, wide enough that butt caps
+       cannot bridge them. Round caps would: a 4.2-wide stroke puts a 2.1
+       half-disc on each endpoint, which closes any gap under ~4.2 units. -->
+  <rect width="64" height="64" rx="14" fill="#111827"/>
+  <g fill="none" stroke="#ffffff" stroke-width="4.2" stroke-linecap="butt">
+    <path d="M39.45 21.55A13 13 0 0 0 21.55 39.45"/>
+    <path d="M24.55 42.45A13 13 0 0 0 42.45 24.55"/>
+  </g>
+  <path fill="#ffffff" d="M47.2 12.4 35.6 32.2l-3.8-3.8z"/>
+  <path fill="#ffffff" d="M16.8 51.6 28.4 31.8l3.8 3.8z"/>
+</svg>

@@ -1,0 +1,172 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # A dependency advisory can land without anyone touching this repository.
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # windows-latest is the platform this fork exists for: every
+        # cfg(windows) branch in src/platform.rs is otherwise unbuilt.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      # rust-toolchain.toml pins the version, so rustup installs it with the
+      # rustfmt and clippy components this workflow needs.
+      - name: Show toolchain
+        run: rustc --version && cargo --version
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Format
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Test
+        run: cargo test --all-targets --all-features --locked
+
+      - name: Build release
+        run: cargo build --release --locked
+
+      - name: Verify Windows manifest artifact
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Copy-Item -LiteralPath 'target/release/herdr-agent-quota.exe' -Destination 'target/release/herdr-agent-quota' -Force -ErrorAction Stop
+          $exe = (Get-FileHash -Algorithm SHA256 -LiteralPath 'target/release/herdr-agent-quota.exe').Hash
+          $extensionless = (Get-FileHash -Algorithm SHA256 -LiteralPath 'target/release/herdr-agent-quota').Hash
+          if ($exe -ne $extensionless) { throw 'Windows manifest artifact differs from the release executable' }
+          & cmd.exe /D /C target\release\herdr-agent-quota.exe --help | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Windows pane command wrapper failed' }
+
+  # This plugin reads credential stores and sends bearer tokens to provider
+  # billing endpoints, so a known-vulnerable dependency is a security issue,
+  # not a chore. The schedule catches advisories published after a merge.
+  audit:
+    name: dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@cargo-audit
+      - run: cargo audit --deny warnings
+
+  plugin-manifest:
+    name: plugin manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Herdr refuses to load a plugin whose root manifest is missing or
+      # malformed, so a broken manifest must fail here rather than on install.
+      - name: Validate herdr-plugin.toml
+        run: |
+          python3 - <<'PY'
+          import sys, tomllib
+
+          with open("herdr-plugin.toml", "rb") as handle:
+              manifest = tomllib.load(handle)
+
+          errors = []
+          for key in ("id", "name", "version", "min_herdr_version", "description"):
+              if not manifest.get(key):
+                  errors.append(f"missing required key: {key}")
+
+          allowed_platforms = {"linux", "macos", "windows"}
+          bad = set(manifest.get("platforms", [])) - allowed_platforms
+          if bad:
+              errors.append(f"unknown platforms: {sorted(bad)}")
+
+          # Herdr runs commands as argv with no shell, so a `$VAR` is a literal
+          # that silently fails at runtime rather than expanding.
+          sections = ("build", "startup", "actions", "events", "panes", "link_handlers")
+          windows_panes = {
+              "dashboard-windows": "dashboard",
+              "settings-windows": "settings",
+              "dashboard-split-windows": "dashboard",
+          }
+          for section in sections:
+              for index, entry in enumerate(manifest.get(section, [])):
+                  where = f"[[{section}]] #{index}"
+                  command = entry.get("command")
+                  if not isinstance(command, list) or not command:
+                      errors.append(f"{where}: command must be a non-empty array")
+                      continue
+                  if any(not isinstance(arg, str) for arg in command):
+                      errors.append(f"{where}: command entries must be strings")
+                      continue
+                  for arg in command:
+                      if "$" in arg:
+                          errors.append(f"{where}: no shell expansion, so {arg!r} is a literal")
+                  expected_windows_command = [
+                      "cmd.exe", "/D", "/C", r"target\release\herdr-agent-quota.exe",
+                      windows_panes.get(entry.get("id")),
+                  ]
+                  intentional_windows_wrapper = (
+                      section == "panes"
+                      and entry.get("platforms") == ["windows"]
+                      and windows_panes.get(entry.get("id")) is not None
+                      and command == expected_windows_command
+                  )
+                  if (command[0] in ("sh", "bash", "cmd", "cmd.exe", "powershell", "pwsh")
+                          and not intentional_windows_wrapper):
+                      errors.append(f"{where}: commands run without a shell")
+
+          # Only *action* ids forbid a dot; the plugin id allows one.
+          for index, action in enumerate(manifest.get("actions", [])):
+              action_id = action.get("id", "")
+              if not action_id:
+                  errors.append(f"[[actions]] #{index}: missing id")
+              elif "." in action_id:
+                  errors.append(f"action id {action_id!r} may not contain a dot")
+
+          placements = {"overlay", "popup", "split", "tab", "zoomed"}
+          for pane in manifest.get("panes", []):
+              placement = pane.get("placement", "overlay")
+              if placement not in placements:
+                  errors.append(f"pane {pane.get('id')!r}: illegal placement {placement!r}")
+
+          # Every declared subcommand must exist, or the entrypoint fails
+          # silently once installed.
+          import subprocess
+          help_text = subprocess.run(
+              ["cargo", "run", "--quiet", "--release", "--", "--help"],
+              capture_output=True, text=True).stdout
+          for section in sections:
+              for entry in manifest.get(section, []):
+                  command = entry.get("command") or []
+                  if command and command[0].startswith("target/"):
+                      subcommand = command[1] if len(command) > 1 else None
+                  elif command == [
+                      "cmd.exe", "/D", "/C", r"target\release\herdr-agent-quota.exe",
+                      windows_panes.get(entry.get("id")),
+                  ]:
+                      subcommand = command[-1]
+                  else:
+                      subcommand = None
+                  if subcommand and subcommand not in help_text:
+                      errors.append(f"subcommand {subcommand!r} is not in --help")
+
+          if errors:
+              sys.exit("herdr-plugin.toml:\n  " + "\n  ".join(errors))
+          print("herdr-plugin.toml is valid")
+          PY
