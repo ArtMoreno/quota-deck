@@ -239,6 +239,18 @@ Passing `-OpenRouterKey` explicitly stores that key in QuotaDeck's per-user
 plugin config directory. A full QuotaDeck uninstall removes it; partial agent
 removal does not. Environment and Hermes `.env` keys are never copied.
 
+## Open in your current pane
+
+On Windows, setup installs `quotadeck.cmd` in `%USERPROFILE%\.local\bin`.
+Type `quotadeck` in a Herdr shell to run the dashboard in that same pane.
+Press `q` or Esc to return to the shell. This command does not create another
+pane or print a JSON action receipt. If that directory is not on PATH, run
+`& "$env:USERPROFILE\.local\bin\quotadeck.cmd"` in PowerShell.
+
+Use `prefix+shift+d` when you deliberately want an additional split beside an
+existing agent. The `herdr plugin action invoke` commands are automation APIs;
+their JSON output is a task receipt, not a dashboard.
+
 ## Refresh health
 
 QuotaDeck 1.4.1 fixes Codex refresh for Windows npm installs. Update existing

@@ -3,6 +3,8 @@ pub mod claude;
 pub mod grok;
 pub mod herdr;
 mod integration;
+#[cfg(windows)]
+mod launcher;
 mod statusline;
 
 use crate::brand::GlyphSet;
@@ -63,6 +65,8 @@ pub fn run(
         }
         herdr::uninstall(agents, full)?;
         if full {
+            #[cfg(windows)]
+            launcher::uninstall()?;
             // Herdr keeps this view until something clears it, so an uninstall
             // that skipped it would leave the panel sorted by a token this
             // plugin no longer publishes.
@@ -153,6 +157,8 @@ pub fn run(
             grok::apply()?;
         }
         integration::report_missing(agents);
+        #[cfg(windows)]
+        launcher::apply()?;
         cache.clear_settings_apply_pending()?;
     } else {
         let cache = CacheStore::from_env().ok();
