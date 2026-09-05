@@ -48,6 +48,7 @@ fn configuration_honors_herdr_native_config_override() {
             .env("XDG_CONFIG_HOME", root.path().join("custom"))
             .env("HERDR_PLUGIN_STATE_DIR", root.path().join("state"))
             .env("HERDR_PLUGIN_CONFIG_DIR", root.path().join("prefs"))
+            .env("HOME", root.path().join("home"))
             .env("HERDR_BIN_PATH", root.path().join("missing-herdr"));
         if native_path {
             command.env("HERDR_CONFIG_PATH", &config);
@@ -1604,6 +1605,7 @@ impl AgentHomes {
             command
                 .arg("configure")
                 .args(args)
+                .env("HOME", self.state.join("home"))
                 .env("HERDR_PLUGIN_STATE_DIR", &self.state)
                 .env("HERDR_CONFIG_FILE", &self.herdr_config)
                 .env("CLAUDE_SETTINGS_FILE", &self.claude_settings)
@@ -1618,6 +1620,31 @@ impl AgentHomes {
     fn sidebar(&self) -> String {
         fs::read_to_string(&self.herdr_config).unwrap_or_default()
     }
+}
+
+#[cfg(windows)]
+#[test]
+fn full_setup_repairs_the_typed_command_and_uninstall_removes_it() {
+    let root = tempdir().unwrap();
+    let homes = AgentHomes::new(root.path());
+    let config = root.path().join("prefs");
+    fs::create_dir_all(&config).unwrap();
+    let env = [("HERDR_PLUGIN_CONFIG_DIR", config.to_str().unwrap())];
+    let path = homes.state.join("home/.local/bin/quotadeck.cmd");
+    fs::create_dir_all(path.parent().unwrap()).unwrap();
+    fs::write(
+        &path,
+        "herdr plugin action invoke open-dashboard-split --plugin herdr-agent-quota-win",
+    )
+    .unwrap();
+    let output = homes.configure_with_env(&["--apply"], &env);
+    assert!(output.status.success(), "{output:?}");
+    let body = fs::read_to_string(&path).unwrap();
+    assert!(body.contains("dashboard"));
+    assert!(!body.contains("open-dashboard-split"));
+    let output = homes.configure_with_env(&["--uninstall"], &env);
+    assert!(output.status.success(), "{output:?}");
+    assert!(!path.exists());
 }
 
 #[test]
