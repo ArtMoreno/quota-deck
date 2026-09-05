@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-09-04
+
+### Fixed
+
+- Windows Codex collection now discovers npm's `codex.cmd` launcher on PATH,
+  including directories with spaces. Explicit `CODEX_BIN_PATH` remains supported.
+- Failed refreshes and expired logins now replace dashboard values with a clear
+  status. Cached values older than two polling intervals (minimum two minutes)
+  are marked stale instead of appearing current. A successful refresh clears
+  the failure status. Sidebar quota also stops presenting failed cached values.
+- Refresh status stores only fixed public codes, never raw errors or credentials.
+
+### Tested
+
+- Real Windows batch launcher and app-server handshake; failure, stale-data and
+  recovery rendering; existing configuration and provider regression suite.
+
 ## [Unreleased]
 
 ### Added

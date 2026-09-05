@@ -139,7 +139,14 @@ fn parse_reset(value: &Value) -> Option<ResetAt> {
 /// the refresh path supplies pane session ids so an older pane is not lost
 /// behind the bounded `thread/list` page.
 pub fn fetch_for_sessions(session_ids: &[String]) -> Result<ProviderSnapshot> {
-    let executable = std::env::var_os("CODEX_BIN_PATH").unwrap_or_else(|| "codex".into());
+    let executable = std::env::var_os("CODEX_BIN_PATH").unwrap_or_else(default_codex_executable);
+    fetch_with_executable(&executable, session_ids)
+}
+
+fn fetch_with_executable(
+    executable: &std::ffi::OsStr,
+    session_ids: &[String],
+) -> Result<ProviderSnapshot> {
     let mut command = Command::new(executable);
     command
         .args(["app-server", "--stdio"])
@@ -168,6 +175,31 @@ pub fn fetch_for_sessions(session_ids: &[String]) -> Result<ProviderSnapshot> {
     let result = fetch_from_process(&mut input, &mut output, session_ids);
     terminate(&child);
     result
+}
+
+fn default_codex_executable() -> std::ffi::OsString {
+    #[cfg(windows)]
+    if let Some(path) = std::env::var_os("PATH") {
+        if let Some(executable) = windows_codex_on_path(std::env::split_paths(&path)) {
+            return executable.into_os_string();
+        }
+    }
+    "codex".into()
+}
+
+#[cfg(windows)]
+fn windows_codex_on_path(paths: impl Iterator<Item = PathBuf>) -> Option<PathBuf> {
+    // Rust does not apply PATHEXT when resolving a bare command. npm installs
+    // codex.cmd; Command handles its batch invocation with escaped arguments.
+    for directory in paths.filter(|path| !path.as_os_str().is_empty()) {
+        for name in ["codex.exe", "codex.cmd"] {
+            let path = directory.join(name);
+            if path.is_file() {
+                return Some(path);
+            }
+        }
+    }
+    None
 }
 
 /// Kill the app-server's process group and reap it, at most once.
@@ -207,6 +239,12 @@ fn fetch_from_process(
 
     write_rpc(input, 2, "account/read", serde_json::json!({}))?;
     let account = read_rpc(output, 2)?;
+    if account
+        .pointer("/result/account")
+        .is_none_or(Value::is_null)
+    {
+        anyhow::bail!(ProviderError::MissingCredentials);
+    }
     if !account_is_chatgpt(&account) {
         anyhow::bail!(ProviderError::Unavailable(
             "Codex is using API-key auth, not a ChatGPT subscription".to_string()
@@ -1038,6 +1076,56 @@ mod tests {
         assert_eq!(
             snapshot.window(WindowKind::Weekly).unwrap().used_percent,
             12.0
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_npm_shim_completes_the_real_stdio_handshake() {
+        let root = tempfile::tempdir().unwrap();
+        let directory = root.path().join("npm with spaces");
+        fs::create_dir(&directory).unwrap();
+        fs::write(directory.join("codex.cmd"),
+            "@echo off\r\npowershell.exe -NoLogo -NoProfile -NonInteractive -File \"%~dp0rpc.ps1\" %*\r\n").unwrap();
+        fs::write(directory.join("rpc.ps1"), r#"
+while ($null -ne ($line = [Console]::ReadLine())) {
+    $request = $line | ConvertFrom-Json
+    if ($null -eq $request.id) { continue }
+    $result = switch ($request.method) {
+        'initialize' { @{} }
+        'account/read' { @{ account = @{ type = 'chatgpt' } } }
+        'account/rateLimits/read' { @{ rateLimits = @{ primary = @{ usedPercent = 17; windowDurationMins = 10080; resetsAt = 2000000000 } } } }
+        'thread/list' { @{ data = @() } }
+        default { throw 'unexpected request' }
+    }
+    @{ id = $request.id; result = $result } | ConvertTo-Json -Depth 8 -Compress
+}
+"#).unwrap();
+        let executable = windows_codex_on_path([directory].into_iter()).unwrap();
+        let snapshot = fetch_with_executable(executable.as_os_str(), &[]).unwrap();
+        assert_eq!(
+            snapshot.window(WindowKind::Weekly).unwrap().used_percent,
+            17.0
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_discovers_npm_shim_without_a_native_executable() {
+        let root = tempfile::tempdir().unwrap();
+        let npm = root.path().join("npm with spaces");
+        fs::create_dir(&npm).unwrap();
+        fs::write(npm.join("codex.ps1"), "ignored").unwrap();
+        assert!(windows_codex_on_path([npm.clone()].into_iter()).is_none());
+        fs::write(npm.join("codex.cmd"), "@echo off").unwrap();
+        assert_eq!(
+            windows_codex_on_path([npm.clone()].into_iter()),
+            Some(npm.join("codex.cmd"))
+        );
+        fs::write(npm.join("codex.exe"), "native").unwrap();
+        assert_eq!(
+            windows_codex_on_path([npm.clone()].into_iter()),
+            Some(npm.join("codex.exe"))
         );
     }
 

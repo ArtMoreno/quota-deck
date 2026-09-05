@@ -282,7 +282,7 @@ fn render_snapshot_with_preferences(
         cache.brand_glyphs().unwrap_or_default(),
     );
     let mut output = String::from("QuotaDeck\r\n\r\n");
-    for (provider, snapshot) in dashboard_rows(cache, preferences)? {
+    for (provider, snapshot) in dashboard_rows(cache, preferences, now)? {
         let preference = preferences.get(provider);
         output.push_str(&match provider {
             DashboardProvider::OpenCode => render_opencode_usage(opencode_usage, style, preference),
@@ -331,13 +331,14 @@ fn render_quota_provider(
 fn dashboard_rows(
     cache: &CacheStore,
     preferences: &DashboardPreferences,
+    now: u64,
 ) -> Result<Vec<(DashboardProvider, Option<ProviderSnapshot>)>> {
     let mut rows = Vec::new();
     for preference in &preferences.providers {
         if !preference.show {
             continue;
         }
-        let snapshot = match preference.provider {
+        let mut snapshot = match preference.provider {
             DashboardProvider::OpenCode => None,
             DashboardProvider::Omp => load_latest_omp(cache)?,
             provider => crate::refresh::load_usable_snapshot(
@@ -345,6 +346,15 @@ fn dashboard_rows(
                 provider.quota_provider().expect("quota provider"),
             )?,
         };
+        if let Some(provider) = preference.provider.quota_provider() {
+            let failure = cache.refresh_problem(provider);
+            if failure.is_some() && snapshot.is_none() {
+                snapshot = Some(ProviderSnapshot::new(provider, Vec::new(), now));
+            }
+            if let Some(snapshot) = snapshot.as_mut() {
+                snapshot.refresh_warning = cache.refresh_warning(provider, Some(snapshot), now);
+            }
+        }
         rows.push((preference.provider, snapshot));
     }
     if cache.agent_order().is_some_and(|order| order.is_quota()) {
@@ -446,7 +456,7 @@ fn render_terminal_scrolled(
         cache.brand_glyphs().unwrap_or_default(),
     );
     let preferences = DashboardPreferences::load_or_default(cache);
-    let rows = dashboard_rows(cache, &preferences)?;
+    let rows = dashboard_rows(cache, &preferences, now)?;
     let width = usize::from(width.max(1));
     let panel_width = width.saturating_sub(4).max(1);
     let mut lines: Vec<(bool, StyledLine)> = vec![
@@ -641,6 +651,9 @@ fn provider_segments(
     preference: &ProviderPreference,
 ) -> Vec<(String, Severity)> {
     if let Some(snapshot) = snapshot {
+        if let Some(warning) = &snapshot.refresh_warning {
+            return vec![(warning.clone(), Severity::Warning)];
+        }
         let segments = dashboard_segments_filtered(snapshot, now_unix, style, preference);
         if !segments.is_empty() {
             return segments;
@@ -739,7 +752,8 @@ fn tightest_visible_window<'a>(
     snapshot: Option<&'a ProviderSnapshot>,
     preference: &ProviderPreference,
 ) -> Option<&'a crate::model::UsageWindow> {
-    snapshot?
+    snapshot
+        .filter(|snapshot| snapshot.refresh_warning.is_none())?
         .windows
         .iter()
         .filter(|window| percentage_visible(provider, window.kind, preference))
@@ -784,6 +798,43 @@ mod tests {
 
     fn window(kind: WindowKind, used: f64, reset: Option<u64>) -> UsageWindow {
         UsageWindow::new(kind, used, reset.map(ResetAt::from_unix_seconds)).unwrap()
+    }
+
+    #[test]
+    fn failed_expired_and_recovered_refreshes_never_show_old_quota_as_current() {
+        let directory = tempdir().unwrap();
+        let cache = CacheStore::new(directory.path());
+        let provider = Provider::OpenRouter;
+        let mut snapshot = ProviderSnapshot::new(
+            provider,
+            vec![window(WindowKind::Monthly, 61.0, None)],
+            1000,
+        );
+        cache.save(&snapshot).unwrap();
+        cache.set_refresh_problem(provider, Some("login")).unwrap();
+        let frame = render_snapshot_with_opencode(&cache, 1001, None).unwrap();
+        assert!(frame.contains("sign in again"));
+        assert!(!frame.contains("39%"));
+        cache.set_refresh_problem(provider, Some("failed")).unwrap();
+        assert!(render_snapshot_with_opencode(&cache, 1002, None)
+            .unwrap()
+            .contains("refresh failed"));
+        cache.set_refresh_problem(provider, None).unwrap();
+        assert!(render_snapshot_with_opencode(&cache, 1201, None)
+            .unwrap()
+            .contains("stale; last update"));
+        snapshot.fetched_at_unix = 1202;
+        cache.save(&snapshot).unwrap();
+        let frame = render_snapshot_with_opencode(&cache, 1203, None).unwrap();
+        assert!(frame.contains("39%"));
+        assert!(!frame.contains("sign in again"));
+        assert!(!frame.contains("refresh failed"));
+        assert!(cache
+            .set_refresh_problem(provider, Some("secret-token"))
+            .is_err());
+        assert!(!serde_json::to_string(&snapshot)
+            .unwrap()
+            .contains("refresh_warning"));
     }
 
     #[test]
@@ -864,7 +915,7 @@ mod tests {
         );
         cache.save(&snapshot).unwrap();
 
-        let rows = dashboard_rows(&cache, &DashboardPreferences::default()).unwrap();
+        let rows = dashboard_rows(&cache, &DashboardPreferences::default(), 0).unwrap();
         let claude = rows
             .into_iter()
             .find(|(provider, _)| *provider == DashboardProvider::Claude)
@@ -898,7 +949,7 @@ mod tests {
             ))
             .unwrap();
 
-        let rows = dashboard_rows(&cache, &DashboardPreferences::default()).unwrap();
+        let rows = dashboard_rows(&cache, &DashboardPreferences::default(), 0).unwrap();
         assert_eq!(rows[0].0, DashboardProvider::Codex);
         assert_eq!(rows[1].0, DashboardProvider::Grok);
     }

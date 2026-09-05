@@ -342,15 +342,23 @@ fn resolved_pane_tokens(
                     snapshot.usable_for_account(account_id.as_deref(), mtime)
                         && snapshot_is_fresh(cache, provider, snapshot, CacheStore::now_unix())
                 });
-                tokens_for_loaded_snapshot(
-                    provider,
-                    snapshot.as_ref(),
-                    usable,
-                    now,
-                    pane.session.as_ref().and_then(|session| session.id()),
-                    style,
-                )
-                .map(|values| PaneQuotaUpdate::Replace(Box::new(values)))
+                let values = if let Some(warning) = cache.refresh_warning(provider, usable, now) {
+                    Some(MetadataTokens::unavailable_with(
+                        provider,
+                        warning,
+                        style.glyphs,
+                    ))
+                } else {
+                    tokens_for_loaded_snapshot(
+                        provider,
+                        snapshot.as_ref(),
+                        usable,
+                        now,
+                        pane.session.as_ref().and_then(|session| session.id()),
+                        style,
+                    )
+                };
+                values.map(|values| PaneQuotaUpdate::Replace(Box::new(values)))
             } else {
                 // Not one of the original four, so it is never fetched by the
                 // provider list: this pane resolved to it, so this pane pays
@@ -522,8 +530,15 @@ fn refresh_scoped_target(cache: &CacheStore, target: &BillingTarget, force: bool
     if cache.mark_refresh(target.billing, now).is_err() {
         return;
     }
-    if let Ok(snapshot) = opencode_go::fetch(&key) {
-        let _ = cache.save(&snapshot);
+    match opencode_go::fetch(&key) {
+        Ok(snapshot) => {
+            if cache.save(&snapshot).is_ok() {
+                let _ = cache.set_refresh_problem(target.billing, None);
+            }
+        }
+        Err(error) => {
+            let _ = cache.set_refresh_problem(target.billing, Some(public_refresh_problem(&error)));
+        }
     }
 }
 
@@ -655,6 +670,7 @@ fn refresh_provider(
             } else {
                 cache.save(&snapshot)?;
             }
+            cache.set_refresh_problem(provider, None)?;
             Ok(ProviderOutcome {
                 provider,
                 available: true,
@@ -662,12 +678,50 @@ fn refresh_provider(
                 error: None,
             })
         }
-        Err(error) => Ok(ProviderOutcome {
-            provider,
-            available: load_usable_snapshot(cache, provider)?.is_some(),
-            from_cache: true,
-            error: Some(error.to_string()),
-        }),
+        Err(error) => {
+            cache.set_refresh_problem(provider, Some(public_refresh_problem(&error)))?;
+            Ok(ProviderOutcome {
+                provider,
+                available: load_usable_snapshot(cache, provider)?.is_some(),
+                from_cache: true,
+                error: Some(error.to_string()),
+            })
+        }
+    }
+}
+
+#[test]
+fn public_refresh_failures_do_not_persist_private_error_details() {
+    use crate::providers::ProviderError;
+    assert_eq!(
+        public_refresh_problem(&ProviderError::Request("HTTP 401".into()).into()),
+        "login"
+    );
+    assert_eq!(
+        public_refresh_problem(&ProviderError::MissingCredentials.into()),
+        "credentials"
+    );
+    assert_eq!(
+        public_refresh_problem(&anyhow::anyhow!("private token and endpoint")),
+        "failed"
+    );
+}
+
+fn public_refresh_problem(error: &anyhow::Error) -> &'static str {
+    match error.downcast_ref::<crate::providers::ProviderError>() {
+        Some(crate::providers::ProviderError::MissingCredentials) => "credentials",
+        Some(crate::providers::ProviderError::Request(status))
+            if matches!(status.as_str(), "HTTP 401" | "HTTP 403") =>
+        {
+            "login"
+        }
+        _ if error
+            .downcast_ref::<std::io::Error>()
+            .is_some_and(|e| e.kind() == std::io::ErrorKind::NotFound) =>
+        {
+            "cli"
+        }
+        _ => "failed",
     }
 }
 
