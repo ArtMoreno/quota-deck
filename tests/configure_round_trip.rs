@@ -2286,9 +2286,14 @@ fn pi_codex_event_overlays_exact_session_context_and_cache_without_inventing_ttl
     assert!(calls.contains("--token quota_cache=cache 85.0%"), "{calls}");
     assert!(!calls.contains("quota_cache_ttl"), "{calls}");
     assert!(
-        calls.contains("--token quota_week_normal=7d 80%"),
+        calls.contains("--token quota_week_unknown=7d N/A"),
         "{calls}"
     );
+    assert!(
+        calls.contains("--token quota_error=refresh failed"),
+        "{calls}"
+    );
+    assert!(!calls.contains("7d 80%"), "{calls}");
 }
 
 #[test]

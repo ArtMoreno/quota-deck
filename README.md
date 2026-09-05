@@ -239,6 +239,20 @@ Passing `-OpenRouterKey` explicitly stores that key in QuotaDeck's per-user
 plugin config directory. A full QuotaDeck uninstall removes it; partial agent
 removal does not. Environment and Hermes `.env` keys are never copied.
 
+## Refresh health
+
+QuotaDeck 1.4.1 fixes Codex refresh for Windows npm installs. Update existing
+installs with `herdr plugin install ArtMoreno/herdr-agent-quota-win`, run the
+configure action, and reopen your QuotaDeck pane.
+
+If a request fails, the dashboard shows `refresh failed; check connection`.
+An expired or rejected login shows `sign in again`; missing credentials or a
+missing CLI have their own messages. Old cached values are hidden while these
+messages are shown. Without a successful update for two polling intervals
+(minimum two minutes), the row shows its last-update age as stale. Sign into
+the affected harness/provider normally, then press `r` to retry. QuotaDeck does
+not renew or change your provider credentials.
+
 ## Brand marks
 
 Herdr's sidebar is a grid of text cells, so a sidebar logo is a **font glyph**,

@@ -74,6 +74,52 @@ impl CacheStore {
         &self.root
     }
 
+    /// Only fixed public status codes are persisted, never provider error text.
+    pub fn set_refresh_problem(&self, provider: Provider, code: Option<&str>) -> Result<()> {
+        self.ensure()?;
+        let path = self.root.join(format!("{}.problem", provider.source()));
+        match code {
+            Some(code @ ("login" | "credentials" | "failed" | "cli")) => {
+                let temp = path.with_extension(format!("problem.{}.tmp", std::process::id()));
+                Self::atomic_replace(&path, &temp, code.as_bytes().to_vec())
+            }
+            Some(_) => anyhow::bail!("invalid public refresh status"),
+            None => match fs::remove_file(path) {
+                Ok(()) => Ok(()),
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+                Err(e) => Err(e.into()),
+            },
+        }
+    }
+
+    pub fn refresh_warning(
+        &self,
+        provider: Provider,
+        snapshot: Option<&ProviderSnapshot>,
+        now: u64,
+    ) -> Option<String> {
+        self.refresh_problem(provider)
+            .map(str::to_string)
+            .or_else(|| {
+                let snapshot = snapshot?;
+                let age = now.saturating_sub(snapshot.fetched_at_unix);
+                let stale_after = self.watch_interval_seconds().saturating_mul(2).max(120);
+                (age > stale_after).then(|| format!("stale; last update {}m ago", age / 60))
+            })
+    }
+
+    pub fn refresh_problem(&self, provider: Provider) -> Option<&'static str> {
+        let value =
+            fs::read_to_string(self.root.join(format!("{}.problem", provider.source()))).ok()?;
+        match value.as_str() {
+            "login" => Some("sign in again"),
+            "credentials" => Some("credentials unavailable"),
+            "failed" => Some("refresh failed; check connection"),
+            "cli" => Some("CLI not found; check installation"),
+            _ => None,
+        }
+    }
+
     pub fn ensure(&self) -> Result<()> {
         fs::create_dir_all(&self.root)
             .with_context(|| format!("create cache directory {}", self.root.display()))

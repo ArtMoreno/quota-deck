@@ -611,6 +611,9 @@ pub struct ProviderSnapshot {
     pub provider: Provider,
     pub source: String,
     pub fetched_at_unix: u64,
+    /// Transient UI health; never persisted with account data.
+    #[serde(skip)]
+    pub refresh_warning: Option<String>,
     pub windows: Vec<UsageWindow>,
     #[serde(default)]
     pub context: Option<ContextUsage>,
@@ -652,6 +655,7 @@ impl ProviderSnapshot {
             provider,
             source: provider.source().to_string(),
             fetched_at_unix,
+            refresh_warning: None,
             windows,
             context: None,
             model: None,
