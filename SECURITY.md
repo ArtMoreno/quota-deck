@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Report privately through
-[GitHub Security Advisories](https://github.com/ArtMoreno/herdr-agent-quota-win/security/advisories/new).
+[GitHub Security Advisories](https://github.com/ArtMoreno/QuotaDeck/security/advisories/new).
 Please do not open a public issue for a vulnerability. Expect a first response
 within 7 days.
 

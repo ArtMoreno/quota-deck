@@ -19,8 +19,8 @@ Requires Rust `1.95+` (pinned by `rust-toolchain.toml`, so `rustup` installs it
 for you) and Herdr `0.8.2+`.
 
 ```sh
-git clone https://github.com/ArtMoreno/herdr-agent-quota-win
-cd herdr-agent-quota-win
+git clone https://github.com/ArtMoreno/QuotaDeck
+cd QuotaDeck
 ./install.sh
 ```
 
