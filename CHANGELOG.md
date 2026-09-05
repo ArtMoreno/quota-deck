@@ -670,8 +670,8 @@ Herdr install; the binary name is unchanged.
 - A popup dashboard pane, event-driven refresh, and a local snapshot cache that
   survives provider failures.
 
-[Unreleased]: https://github.com/ArtMoreno/QuotaDeck/compare/v1.4.0...HEAD
-[1.4.0]: https://github.com/ArtMoreno/QuotaDeck/tree/v1.4.0
+[Unreleased]: https://github.com/ArtMoreno/quota-deck/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/ArtMoreno/quota-deck/tree/v1.4.0
 [1.3.0]: https://github.com/levi-qiao/herdr-agent-quota/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/levi-qiao/herdr-agent-quota/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/levi-qiao/herdr-agent-quota/compare/v1.0.0...v1.1.0

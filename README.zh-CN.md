@@ -10,7 +10,7 @@
 > 品牌标记和可配置 dashboard。详见
 > [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
 
-[![CI](https://github.com/ArtMoreno/QuotaDeck/actions/workflows/ci.yml/badge.svg)](https://github.com/ArtMoreno/QuotaDeck/actions/workflows/ci.yml)
+[![CI](https://github.com/ArtMoreno/quota-deck/actions/workflows/ci.yml/badge.svg)](https://github.com/ArtMoreno/quota-deck/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## 安装
@@ -24,7 +24,7 @@ Agent CLI。
 未安装图标字体时，可在 Settings 中将 Brand glyphs 改为 `unicode`。
 
 ```sh
-herdr plugin install ArtMoreno/QuotaDeck
+herdr plugin install ArtMoreno/quota-deck
 herdr plugin action invoke configure --plugin herdr-agent-quota-win
 herdr plugin log list --plugin herdr-agent-quota-win --limit 5
 ```

@@ -7,9 +7,9 @@
 Live quota, model, context and cache data.<br>
 One resizable pane, beside your work in Herdr.
 
-**[Website](https://artmoreno.github.io/QuotaDeck/) · [Install](#install) · [Settings](#settings) · [中文](README.zh-CN.md)**
+**[Website](https://artmoreno.github.io/quota-deck/) · [Install](#install) · [Settings](#settings) · [中文](README.zh-CN.md)**
 
-[![CI](https://github.com/ArtMoreno/QuotaDeck/actions/workflows/ci.yml/badge.svg)](https://github.com/ArtMoreno/QuotaDeck/actions/workflows/ci.yml)
+[![CI](https://github.com/ArtMoreno/quota-deck/actions/workflows/ci.yml/badge.svg)](https://github.com/ArtMoreno/quota-deck/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-c8ff72?labelColor=21172b)](LICENSE)
 [![Herdr](https://img.shields.io/badge/Herdr-0.8.2%2B-c8ff72?labelColor=21172b)](https://herdr.dev)
 
@@ -17,7 +17,7 @@ One resizable pane, beside your work in Herdr.
 
 </div>
 
-<p align="center"><a href="https://artmoreno.github.io/QuotaDeck/"><img src="docs/site/assets/herdr-real-three-panes.png" alt="Claude Code and OpenCode working alongside QuotaDeck in a real three-pane Herdr session" width="100%"></a></p>
+<p align="center"><a href="https://artmoreno.github.io/quota-deck/"><img src="docs/site/assets/herdr-real-three-panes.png" alt="Claude Code and OpenCode working alongside QuotaDeck in a real three-pane Herdr session" width="100%"></a></p>
 
 <p align="center"><sub>Real Claude Code and OpenCode sessions in a fictional ClipBench project. QuotaDeck values are illustrative.</sub></p>
 
@@ -66,7 +66,7 @@ Before updating a Windows checkout, close its QuotaDeck dashboard and Settings
 panes so Windows can replace the executable. Your agent panes can stay open.
 
 ```sh
-herdr plugin install ArtMoreno/QuotaDeck
+herdr plugin install ArtMoreno/quota-deck
 herdr plugin action invoke configure --plugin herdr-agent-quota-win
 ```
 
@@ -83,8 +83,8 @@ herdr plugin log list --plugin herdr-agent-quota-win --limit 5
 To work from a local checkout instead:
 
 ```sh
-git clone https://github.com/ArtMoreno/QuotaDeck.git
-cd QuotaDeck
+git clone https://github.com/ArtMoreno/quota-deck.git
+cd quota-deck
 ./install.sh                  # macOS, Linux
 ```
 
@@ -254,7 +254,7 @@ their JSON output is a task receipt, not a dashboard.
 ## Refresh health
 
 QuotaDeck 1.4.1 fixes Codex refresh for Windows npm installs. Update existing
-installs with `herdr plugin install ArtMoreno/QuotaDeck`, run the
+installs with `herdr plugin install ArtMoreno/quota-deck`, run the
 configure action, and reopen your QuotaDeck pane.
 
 If a request fails, the dashboard shows `refresh failed; check connection`.
