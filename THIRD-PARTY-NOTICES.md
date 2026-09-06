@@ -69,8 +69,10 @@ renders are covered by this project's MIT licence.
 `src/brand.rs` references private-use codepoints in the `Herdr Agent Icons Max`
 font, which ships with the separate
 [qintmb/herdr-icon-agent-ui](https://github.com/qintmb/herdr-icon-agent-ui)
-plugin. No font data is bundled here — only the codepoint numbers, so that the
-two agree. The `unicode` glyph set exists for users without that font.
+plugin. The bundled `docs/icons/QuotaDeckIcons-Regular.ttf` is an eight-provider
+subset of that MIT-licensed font, with the CC0 OpenRouter path added. Its
+license is reproduced in `docs/icons/FONT-LICENSE.txt`. The reproducible
+builder is `scripts/build-icon-font.py`. The `unicode` glyph set exists for users without that font.
 
 ## Herdr website logo
 

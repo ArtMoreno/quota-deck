@@ -289,6 +289,31 @@ Each mark under [`docs/icons/`](docs/icons) ships as SVG and transparent 64px
 PNG for documentation and image-capable surfaces; nothing in the sidebar reads
 them.
 
+### WezTerm: missing logos / empty boxes
+
+WezTerm must explicitly load a font containing QuotaDeck's private-use glyphs.
+Installing a font for another terminal does not configure WezTerm's fallback list.
+
+1. Copy [QuotaDeckIcons-Regular.ttf](docs/icons/QuotaDeckIcons-Regular.ttf) into
+   a `fonts` folder next to your WezTerm configuration. For Windows' default
+   `~/.wezterm.lua`, this is `~/fonts/QuotaDeckIcons-Regular.ttf`.
+2. Merge the fields from [scripts/wezterm.lua](scripts/wezterm.lua) into your
+   configuration. Keep your existing primary font instead of JetBrains Mono
+   if you use another one. Append the directory and fallback to existing lists.
+3. Reload WezTerm with Ctrl+Shift+R. No Herdr or agent restart is needed.
+
+The bundled icon-only font includes Claude, Codex, OpenCode, omp, Hermes,
+Gemini/Agy, Grok, and OpenRouter. It is an MIT-licensed subset of Herdr Agent
+Icons Max plus the existing CC0 OpenRouter path; see
+[font license](docs/icons/FONT-LICENSE.txt). No OS-wide font installation is needed.
+QuotaDeck does not overwrite your terminal configuration during plugin updates.
+
+Verify selection with:
+
+```sh
+wezterm ls-fonts --codepoints e1a0,e1a1,e1a2,e1a3,e1aa,e1ae,e1b1,e1b2
+```
+
 ## What is displayed
 
 | Dimension | Source and behavior |
