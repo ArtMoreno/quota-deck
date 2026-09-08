@@ -149,16 +149,12 @@ pub fn detach_process_group(command: &mut Command) {
 /// Fully detach a child so it survives the parent exiting.
 ///
 /// The watch poller is started by a short-lived event hook and has to outlive
-/// it. `setsid` does that on Unix; on Windows a new process group plus a
-/// detached console is the equivalent, since there are no session leaders and
-/// a child is not killed by its parent exiting in the first place.
+/// it. `setsid` does that on Unix; Windows children already survive a parent
+/// exiting, so use the same windowless process group as the collectors.
 pub fn detach_fully(command: &mut Command) {
     #[cfg(windows)]
     {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
-        const DETACHED_PROCESS: u32 = 0x0000_0008;
-        command.creation_flags(CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS);
+        detach_process_group(command);
     }
     #[cfg(unix)]
     {
@@ -319,6 +315,41 @@ pub const EXECUTABLE_SUFFIX: &str = std::env::consts::EXE_SUFFIX;
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(windows)]
+    #[test]
+    fn detached_child_has_a_windowless_console() {
+        const CHILD: &str = "QUOTA_TEST_WINDOWLESS_CHILD";
+        if std::env::var_os(CHILD).is_some() {
+            #[link(name = "kernel32")]
+            extern "system" {
+                fn GetConsoleCP() -> u32;
+                fn GetConsoleWindow() -> *mut std::ffi::c_void;
+            }
+            #[link(name = "user32")]
+            extern "system" {
+                fn IsWindowVisible(window: *mut std::ffi::c_void) -> i32;
+            }
+            unsafe {
+                // DETACHED_PROCESS has no console (CP = 0); CREATE_NO_WINDOW
+                // provides a console without a visible window.
+                assert_ne!(GetConsoleCP(), 0);
+                assert_eq!(IsWindowVisible(GetConsoleWindow()), 0);
+            }
+            return;
+        }
+        let mut command = Command::new(std::env::current_exe().unwrap());
+        command
+            .args([
+                "--exact",
+                "platform::tests::detached_child_has_a_windowless_console",
+            ])
+            .env(CHILD, "1")
+            .stdin(std::process::Stdio::null());
+        detach_fully(&mut command);
+        let output = command.output().unwrap();
+        assert!(output.status.success(), "{output:?}");
+    }
 
     #[cfg(windows)]
     fn test_pipe_path(label: &str) -> String {

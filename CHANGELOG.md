@@ -39,6 +39,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Community fixes
+
+- Start Windows background watchers in a windowless process group, matching
+  collector launches. Thanks to [@Cainiaooo](https://github.com/Cainiaooo) for
+  reporting the flash and testing the proposed flag change in
+  [#4](https://github.com/ArtMoreno/quota-deck/issues/4).
+- Add optional HTTP proxy settings shared by the five HTTP quota collectors,
+  with installer options, environment fallbacks, an `off` override, and full
+  uninstall cleanup. Thanks to [@Cainiaooo](https://github.com/Cainiaooo) for
+  the report and configuration design in
+  [#5](https://github.com/ArtMoreno/quota-deck/issues/5).
+
 ### Added
 
 - Claude quota and reset windows now refresh directly from Claude Code's local

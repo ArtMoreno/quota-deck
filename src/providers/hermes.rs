@@ -18,7 +18,6 @@ use crate::providers::ProviderError;
 use anyhow::{Context, Result};
 use serde_json::Value;
 use std::path::PathBuf;
-use std::time::Duration;
 
 const DEFAULT_PORTAL_URL: &str = "https://portal.nousresearch.com";
 const ACCOUNT_PATH: &str = "/api/oauth/account";
@@ -127,11 +126,7 @@ fn base64url_decode(input: &str) -> Option<Vec<u8>> {
 pub fn fetch() -> Result<ProviderSnapshot> {
     let path = auth_path().context("resolve Hermes auth path")?;
     let credentials = read_credentials(&path).map_err(anyhow::Error::from)?;
-    let agent = ureq::AgentBuilder::new()
-        .timeout_connect(Duration::from_secs(5))
-        .timeout_read(Duration::from_secs(10))
-        .timeout_write(Duration::from_secs(10))
-        .build();
+    let agent = super::http::agent_builder().build();
     let value: Value = agent
         .get(&format!("{}{ACCOUNT_PATH}", credentials.portal_base_url))
         .set(

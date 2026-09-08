@@ -239,6 +239,38 @@ Passing `-OpenRouterKey` explicitly stores that key in QuotaDeck's per-user
 plugin config directory. A full QuotaDeck uninstall removes it; partial agent
 removal does not. Environment and Hermes `.env` keys are never copied.
 
+## HTTP proxy
+
+Grok, Claude, Hermes, OpenRouter, and OpenCode Go quota requests can use an
+HTTP proxy, including a local Clash mixed port. For a development install:
+
+```powershell
+.\install.ps1 -HttpProxy http://127.0.0.1:7890
+```
+
+On macOS/Linux, use `./install.sh --http-proxy http://127.0.0.1:7890`.
+For a GitHub-managed install, save the URL as plain UTF-8 text in
+`<herdr plugin config-dir herdr-agent-quota-win>/http-proxy`.
+
+The first nonempty value wins: the `http-proxy` file, then
+`HERDR_AGENT_QUOTA_HTTP_PROXY`, then `HTTPS_PROXY`, `https_proxy`, `ALL_PROXY`,
+`all_proxy`, `HTTP_PROXY`, and `http_proxy`. Environment variables must be in
+the **Herdr server's environment**; setting them in a pane shell is insufficient.
+The file is read on each fetch, so it does not require restarting Herdr.
+
+Use `off` in the file to force direct access, even when proxy environment
+variables exist. Delete or empty the file to return to environment selection.
+With no value, requests go direct. Invalid or unsupported values also go direct
+without trying a lower-priority setting. A valid but unreachable proxy causes
+a refresh failure; it does not silently retry directly.
+
+Use an `http://host:port` URL: HTTPS provider traffic uses CONNECT with normal
+TLS certificate verification. This version does not support `https://` or SOCKS
+proxy endpoints, IPv6 proxy hosts, or `NO_PROXY` exclusions. Codex and Agy do not
+use this HTTP client and are unaffected. Provider endpoints and authentication
+stay the same. Proxy URLs are not logged or cached; the explicit installer
+option stores the URL in per-user plugin config, removed on full uninstall.
+
 ## Open in your current pane
 
 On Windows, setup installs `quotadeck.cmd` in `%USERPROFILE%\.local\bin`.

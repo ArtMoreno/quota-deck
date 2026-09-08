@@ -17,7 +17,6 @@ use crate::model::{Provider, ProviderSnapshot, ResetAt, UsageWindow, WindowKind}
 use crate::providers::ProviderError;
 use anyhow::{Context, Result};
 use serde_json::Value;
-use std::time::Duration;
 
 /// Official host and path. Credentials are only ever sent here; a redirect
 /// away from this host drops the request rather than following it.
@@ -40,10 +39,7 @@ pub fn fetch(key: &str) -> Result<ProviderSnapshot> {
     if key.trim().is_empty() {
         return Err(ProviderError::MissingCredentials.into());
     }
-    let agent = ureq::AgentBuilder::new()
-        .timeout_connect(Duration::from_secs(5))
-        .timeout_read(Duration::from_secs(10))
-        .timeout_write(Duration::from_secs(10))
+    let agent = super::http::agent_builder()
         // A credential-bearing request must not be replayed to another host.
         .redirects(0)
         .build();
