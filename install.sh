@@ -13,6 +13,7 @@
 #   ./install.sh --brand-glyphs unicode
 #   ./install.sh --agent-order quota
 #   ./install.sh --low-quota-alert 10
+#   ./install.sh --http-proxy http://127.0.0.1:7890
 #
 # --agent installs only the agents you name (all, claude, codex, grok, agy,
 # opencode, pi, omp, hermes). Anything you leave out gets no sidebar row, no statusLine
@@ -46,7 +47,9 @@
 # per provider, when its remaining quota falls to that number or below, and
 # again only after it has recovered above it.
 #
-# Everything here can also be changed later in the QuotaDeck settings pane.
+# --http-proxy sets an HTTP proxy for quota requests, or off for direct access.
+# HTTPS requests use an HTTP CONNECT tunnel. Omit to keep the existing choice.
+# Display options can also be changed later in the QuotaDeck settings pane.
 #
 # Every option is written to the plugin config directory before configure runs.
 # Herdr executes a plugin action with a fixed command line in the server's own
@@ -70,6 +73,7 @@ BRAND_COLORS=""
 BRAND_GLYPHS=""
 AGENT_ORDER=""
 LOW_QUOTA_ALERT=""
+QUOTA_HTTP_PROXY=""
 
 while (($# > 0)); do
   case "$1" in
@@ -123,8 +127,13 @@ while (($# > 0)); do
       LOW_QUOTA_ALERT="$2"
       shift 2
       ;;
+    --http-proxy)
+      (($# >= 2)) || { printf 'error: missing value for %s\n' "$1" >&2; exit 1; }
+      QUOTA_HTTP_PROXY="$2"
+      shift 2
+      ;;
     -h|--help)
-      sed -n '2,56p' "$0"
+      sed -n '2,/^set -euo pipefail/{ /^set -euo pipefail/d; p; }' "$0"
       exit 0
       ;;
     *)
@@ -201,6 +210,8 @@ write_plugin_pref() {
     || die "cannot resolve plugin config directory"
   mkdir -p "$directory"
   printf '%s\n' "$value" > "$directory/$name"
+  # Proxy URLs can include credentials; also tighten an existing file.
+  if [[ "$name" == http-proxy ]]; then chmod 600 "$directory/$name"; fi
 }
 
 write_plugin_pref agents "$AGENTS"
@@ -213,6 +224,7 @@ write_plugin_pref brand-colors "$BRAND_COLORS"
 write_plugin_pref brand-glyphs "$BRAND_GLYPHS"
 write_plugin_pref agent-order "$AGENT_ORDER"
 write_plugin_pref low-quota-alert "$LOW_QUOTA_ALERT"
+(umask 077; write_plugin_pref http-proxy "$QUOTA_HTTP_PROXY")
 
 printf '%s\n' '→ installing reversible sidebar and provider collectors'
 invoke_action_and_wait configure || die "configuration action failed"

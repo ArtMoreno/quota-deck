@@ -3,6 +3,7 @@ pub mod claude;
 pub mod codex;
 pub mod grok;
 pub mod hermes;
+mod http;
 pub mod omp;
 pub mod opencode_go;
 pub mod openrouter;

@@ -18,7 +18,6 @@ use crate::providers::ProviderError;
 use anyhow::{Context, Result};
 use serde_json::Value;
 use std::path::{Path, PathBuf};
-use std::time::Duration;
 
 const CREDITS_URL: &str = "https://openrouter.ai/api/v1/credits";
 const KEY_URL: &str = "https://openrouter.ai/api/v1/auth/key";
@@ -109,11 +108,7 @@ fn key_files() -> Vec<PathBuf> {
 
 pub fn fetch() -> Result<ProviderSnapshot> {
     let key = api_key().map_err(anyhow::Error::from)?;
-    let agent = ureq::AgentBuilder::new()
-        .timeout_connect(Duration::from_secs(5))
-        .timeout_read(Duration::from_secs(10))
-        .timeout_write(Duration::from_secs(10))
-        .build();
+    let agent = super::http::agent_builder().build();
 
     let credits: Value = agent
         .get(CREDITS_URL)

@@ -5,7 +5,6 @@ use crate::providers::ProviderError;
 use anyhow::{Context, Result};
 use serde_json::Value;
 use std::path::{Path, PathBuf};
-use std::time::Duration;
 
 const USAGE_URL: &str = "https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1";
 const OAUTH_BETA: &str = "oauth-2025-04-20";
@@ -34,10 +33,7 @@ pub fn access_token(path: &Path) -> std::result::Result<String, ProviderError> {
 pub fn fetch() -> Result<ProviderSnapshot> {
     let path = credentials_path().context("resolve Claude credentials path")?;
     let token = access_token(&path).map_err(anyhow::Error::from)?;
-    let value: Value = ureq::AgentBuilder::new()
-        .timeout_connect(Duration::from_secs(5))
-        .timeout_read(Duration::from_secs(10))
-        .timeout_write(Duration::from_secs(10))
+    let value: Value = super::http::agent_builder()
         .build()
         .get(USAGE_URL)
         .set("Authorization", &format!("Bearer {token}"))

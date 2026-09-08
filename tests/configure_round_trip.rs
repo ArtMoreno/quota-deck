@@ -1801,6 +1801,7 @@ fn uninstall_without_an_agent_ignores_a_persisted_subset() {
     let config_dir = root.path().join("plugin-config");
     fs::create_dir_all(&config_dir).unwrap();
     fs::write(config_dir.join("agents"), "codex,grok\n").unwrap();
+    fs::write(config_dir.join("http-proxy"), "http://127.0.0.1:7890\n").unwrap();
     let env = [("HERDR_PLUGIN_CONFIG_DIR", config_dir.to_str().unwrap())];
 
     assert!(homes
@@ -1824,6 +1825,7 @@ fn uninstall_without_an_agent_ignores_a_persisted_subset() {
         "managed rows survived: {sidebar}"
     );
     assert!(!config_dir.join("agents").exists());
+    assert!(!config_dir.join("http-proxy").exists());
 }
 
 #[test]
@@ -1833,6 +1835,7 @@ fn one_shot_uninstall_pref_keeps_action_driven_uninstall_partial() {
     let config_dir = root.path().join("plugin-config");
     fs::create_dir_all(&config_dir).unwrap();
     fs::write(config_dir.join("agents"), "codex,grok\n").unwrap();
+    fs::write(config_dir.join("http-proxy"), "http://127.0.0.1:7890\n").unwrap();
     let env = [("HERDR_PLUGIN_CONFIG_DIR", config_dir.to_str().unwrap())];
     assert!(homes
         .configure_with_env(&["--apply"], &env)
@@ -1849,6 +1852,10 @@ fn one_shot_uninstall_pref_keeps_action_driven_uninstall_partial() {
     assert!(!sidebar.contains("grok ="), "grok survived: {sidebar}");
     assert!(!config_dir.join("uninstall-agents").exists());
     assert!(config_dir.join("agents").exists());
+    assert_eq!(
+        fs::read_to_string(config_dir.join("http-proxy")).unwrap(),
+        "http://127.0.0.1:7890\n"
+    );
 }
 
 #[test]

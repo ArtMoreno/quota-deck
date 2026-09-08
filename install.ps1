@@ -61,6 +61,11 @@ collector can read it without the key being exported into the Herdr server's
 environment. Omit it and the collector falls back to $env:OPENROUTER_API_KEY,
 then the active Hermes home's .env.
 
+.PARAMETER HttpProxy
+HTTP proxy URL for quota requests (for example http://127.0.0.1:7890), or off
+to force direct connections. Stored in the plugin config directory; omitted
+values preserve the existing choice. HTTPS requests use an HTTP CONNECT tunnel.
+
 .EXAMPLE
 .\install.ps1
 
@@ -79,7 +84,8 @@ param(
     [ValidateSet('icon', 'unicode', 'off')][string] $BrandGlyphs,
     [ValidateSet('default', 'quota')][string] $AgentOrder,
     [string] $LowQuotaAlert,
-    [string] $OpenRouterKey
+    [string] $OpenRouterKey,
+    [string] $HttpProxy
 )
 
 $ErrorActionPreference = 'Stop'
@@ -150,6 +156,7 @@ Write-PluginPref 'brand-colors' $BrandColors
 Write-PluginPref 'brand-glyphs' $BrandGlyphs
 Write-PluginPref 'agent-order' $AgentOrder
 Write-PluginPref 'low-quota-alert' $LowQuotaAlert
+Write-PluginPref 'http-proxy' $HttpProxy
 
 if ($OpenRouterKey) {
     Write-PluginPref 'openrouter-key' $OpenRouterKey

@@ -30,9 +30,11 @@ pub const AGENT_ORDER: &str = "agent-order";
 pub const LOW_QUOTA_ALERT: &str = "low-quota-alert";
 /// Optional OpenRouter key explicitly copied here by the installer.
 pub const OPENROUTER_KEY: &str = "openrouter-key";
+/// Optional HTTP proxy for quota requests, or `off` for direct connections.
+pub const HTTP_PROXY: &str = "http-proxy";
 
 /// Every preference a full uninstall must forget.
-pub const ALL: [&str; 12] = [
+pub const ALL: [&str; 13] = [
     AGENTS,
     UNINSTALL_AGENTS,
     WATCH_INTERVAL_SECONDS,
@@ -45,6 +47,7 @@ pub const ALL: [&str; 12] = [
     AGENT_ORDER,
     LOW_QUOTA_ALERT,
     OPENROUTER_KEY,
+    HTTP_PROXY,
 ];
 
 fn directory() -> Option<PathBuf> {
@@ -165,6 +168,7 @@ mod tests {
                 assert!(!directory.path().join(name).exists(), "{name}");
             }
             assert!(ALL.contains(&OPENROUTER_KEY));
+            assert!(ALL.contains(&HTTP_PROXY));
         });
     }
 }
