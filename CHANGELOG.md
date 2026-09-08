@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-09-08
+
+### Community fixes
+
+- Start Windows background watchers in a windowless process group, matching
+  collector launches. Thanks to [@Cainiaooo](https://github.com/Cainiaooo) for
+  reporting the flash and testing the proposed flag change in
+  [#4](https://github.com/ArtMoreno/quota-deck/issues/4).
+- Add optional HTTP proxy settings shared by the five HTTP quota collectors,
+  with installer options, environment fallbacks, an `off` override, and full
+  uninstall cleanup. Thanks to [@Cainiaooo](https://github.com/Cainiaooo) for
+  the report and configuration design in
+  [#5](https://github.com/ArtMoreno/quota-deck/issues/5).
+
 ## [1.4.3] - 2026-09-05
 
 - Bundle an eight-provider icon-only fallback font and WezTerm configuration
@@ -38,18 +52,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   recovery rendering; existing configuration and provider regression suite.
 
 ## [Unreleased]
-
-### Community fixes
-
-- Start Windows background watchers in a windowless process group, matching
-  collector launches. Thanks to [@Cainiaooo](https://github.com/Cainiaooo) for
-  reporting the flash and testing the proposed flag change in
-  [#4](https://github.com/ArtMoreno/quota-deck/issues/4).
-- Add optional HTTP proxy settings shared by the five HTTP quota collectors,
-  with installer options, environment fallbacks, an `off` override, and full
-  uninstall cleanup. Thanks to [@Cainiaooo](https://github.com/Cainiaooo) for
-  the report and configuration design in
-  [#5](https://github.com/ArtMoreno/quota-deck/issues/5).
 
 ### Added
 
