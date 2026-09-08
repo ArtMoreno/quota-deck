@@ -314,6 +314,19 @@ Verify selection with:
 wezterm ls-fonts --codepoints e1a0,e1a1,e1a2,e1a3,e1aa,e1ae,e1b1,e1b2
 ```
 
+### Noctty: missing logos / empty boxes
+
+1. Install [QuotaDeckIcons-Regular.ttf](docs/icons/QuotaDeckIcons-Regular.ttf)
+   for your Windows user.
+2. Add this line to Noctty's `config.ghostty`:
+
+```ini
+font-codepoint-map = U+E1A0-U+E1B2=QuotaDeck Icons
+```
+
+Run `noctty +perform-action reload_config` or open a new Noctty window. Keep
+your existing primary font; the mapping only changes QuotaDeck's logo range.
+
 ## What is displayed
 
 | Dimension | Source and behavior |
